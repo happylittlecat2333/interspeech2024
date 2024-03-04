@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en-US"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+   
+
+<!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Improving Audio Codec-based Zero-Shot Text-to-Speech Synthesis with Multi-Modal Context and Large Language Model</title>
+<meta name="generator" content="Jekyll v3.9.0">
+<meta property="og:title" content="Improving Audio Codec-based Zero-Shot Text-to-Speech Synthesis with Multi-Modal Context and Large Language Model">
+<meta property="og:locale" content="en_US">
+<link rel="canonical" href="https://happylittlecat2333.github.io/interspeech2024-MMCE-Qformer/">
+<meta name="twitter:card" content="summary">
+<!-- End Jekyll SEO tag -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#157878">
+    <link rel="stylesheet" href="./style.css">
+  </head>
+  <body data-new-gr-c-s-check-loaded="14.1023.0" data-gr-ext-installed="">
+    <section class="page-header">
+    <!-- <h1 class="project-name"></h1>
+    <h2 class="project-tagline"></h2> -->
+      
+      
+    </section>
+
+    <section class="main-content">
+      <h1 id=""><center>Improving Audio Codec-based Zero-Shot Text-to-Speech Synthesis with Multi-Modal Context and Large Language Model</center></h1>
+      <!-- <h1 id=""><center> Evaluation </center></h1> -->
+      
+
+<center> <b>| Anonymous | </b> </center>
+<br>
+
+
+
+<h2 id="abstract">Abstract</h2>
+<p>Recent advance in large language models (LLMs) and development of audio codecs greatly propel the modern zero-shot TTS models. They can synthesize personalized speech with only a 3-second speech of an unseen speaker as an acoustic prompt. However, they only support short speech prompts and cannot leverage longer context information, as required in audiobook and conversational TTS scenarios. In
+this paper, we introduce a novel audio codec-based TTS model to adapt contextual features with multiple enhancements. Inspired by the success of Qformer, we propose a multi-modal context-enhanced Qformer (MMCE-Qformer) to fully utilize additional multi-modal context information. Besides, we employ a pretrained LLM to leverage its inherit strong in-context learning ability to predict semantic
+tokens, and use a non-autoregressive confidence-based model SoundStorm to generate acoustic tokens thereby enhancing audio quality and speaker similarity. Our comprehensive experiments show that our proposed method outperform baselines across various context TTS scenarios in terms of both subjective and objective evaluation.</p>
+
+<h2><p class="toc_title">Contents</p></h2>
+<div id="toc_container">
+<ul>
+  <li><a href="#1">Model Architecture</a></li>
+  <li><a href="#2">LibriTTS Evaluation</a></li>
+  <li><a href="#3">IEMOCAP Evaluation</a></li>
+</ul>
+</div>
+
+<a name="1"><h2>Model Architecture</h2></a>
+<div>
+  <br />
+  <p style="text-align: center">
+    <img src="./overview.png" width="900" height="320"/>
+  </p>
+  <p>
+  <figcaption style="text-align:center;">
+    </font>
+    <font size=3>
+      Figure 1: The overview of our proposed model.
+    </font>
+  </figcaption><br><br>
+  </p>
+
+  <br />
+  <p style="text-align: center">
+    <img src="./context_model.png" width="1000" height="350" />
+  </p>
+  <p>
+  <figcaption style="text-align:center;">
+    </font>
+    <font size=3>
+      Figure 2: The structure of MMCE-Qformer encoder.
+    </font>
+  </figcaption><br><br>
+  </p>
+</div>
+<a name="2"><h2>LibriTTS Evaluation</h2></a>
+<p>
+<b>Groundtruth</b>: the groundtruth speech. <br>
+<b>Reconstruct</b>: the reconstruct speech by SpeechTokenizer. <br>
+<b>VALL-E</b>: use the open-source implementation of VALL-E but use SpeechTokenizer as audio codec instead of Encodec.  <br>
+<b>SoundStorm</b>: only use AR stage of above VALL-E model and replace the NAR stage with same SoundStorm model as ours.  <br>
+<b>XTTS</b>: an open-source zero-shot TTS similar to TortoiseTTS, based on a discrete VAE model as audio codec and also use AR model, but it use fixed length vectors for speaker conditioning via Perceiver model. <br>
+<b>Proposed-w/o-context</b>: our proposed method without MMCE-Qformer. <br>
+<b>Proposed-w/-text</b>: our proposed method using only text context. <br>
+<b>Proposed-w/-audio</b>: our proposed method using audio context. <br>
+<b>Proposed</b>: our proposed method using MMCE-Qformer with multi-modal context. <br>
+</p>
+
+<h3>Sample 1</h3>
+<p>Text: then, if she observes any expression of discontent or insubmission in mary's countenance, the mother would add,</b></p>
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center"><strong>Groundtruth</strong></th>
+      <th style="text-align: center"><strong>Reconstruct</strong></th>
+      <th style="text-align: center"><strong>Prompt</strong></th>
+      <th style="text-align: center"><strong>VALL-E</strong></th>
+      <th style="text-align: center"><strong>SoundStorm</strong></th>
+      <th style="text-align: center"><strong>XTTS</strong></th>
+      <th style="text-align: center"><strong>Proposed-w/o-context</strong></th>
+      <th style="text-align: center"><strong>Proposed-w/-text</strong></th>
+      <th style="text-align: center"><strong>Proposed-w/-audio</strong></th>
+      <th style="text-align: center"><strong>Proposed</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left"><audio src="samples/libritts/4/gt.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/4/reconstruct.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/4/prompt.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/4/uslm.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/4/soundstorm.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/4/xtts.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/4/proposed_no_context.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/4/proposed_text.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/4/proposed_audio.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/4/proposed.wav" controls="" preload=""></audio></td>
+  </tbody>
+</table>
+<br>
+<br>
+
+
+<h3>Sample 2</h3>
+<p>Text: he twisted himself like an eel between the outstretched arms of the courtiers, and over the soldiers' muskets he jumped like a little rabbit.</b></p>
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center"><strong>Groundtruth</strong></th>
+      <th style="text-align: center"><strong>Reconstruct</strong></th>
+      <th style="text-align: center"><strong>Prompt</strong></th>
+      <th style="text-align: center"><strong>VALL-E</strong></th>
+      <th style="text-align: center"><strong>SoundStorm</strong></th>
+      <th style="text-align: center"><strong>XTTS</strong></th>
+      <th style="text-align: center"><strong>Proposed-w/o-context</strong></th>
+      <th style="text-align: center"><strong>Proposed-w/-text</strong></th>
+      <th style="text-align: center"><strong>Proposed-w/-audio</strong></th>
+      <th style="text-align: center"><strong>Proposed</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left"><audio src="samples/libritts/13/gt.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/13/reconstruct.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/13/prompt.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/13/uslm.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/13/soundstorm.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/13/xtts.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/13/proposed_no_context.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/13/proposed_text.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/13/proposed_audio.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/13/proposed.wav" controls="" preload=""></audio></td>
+  </tbody>
+</table>
+<br>
+<br>
+
+
+<h3>Sample 3</h3>
+<p>Text: the immense blade was so heavy that it took the strength of seven blueskins to raise it.</b></p>
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center"><strong>Groundtruth</strong></th>
+      <th style="text-align: center"><strong>Reconstruct</strong></th>
+      <th style="text-align: center"><strong>Prompt</strong></th>
+      <th style="text-align: center"><strong>VALL-E</strong></th>
+      <th style="text-align: center"><strong>SoundStorm</strong></th>
+      <th style="text-align: center"><strong>XTTS</strong></th>
+      <th style="text-align: center"><strong>Proposed-w/o-context</strong></th>
+      <th style="text-align: center"><strong>Proposed-w/-text</strong></th>
+      <th style="text-align: center"><strong>Proposed-w/-audio</strong></th>
+      <th style="text-align: center"><strong>Proposed</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left"><audio src="samples/libritts/8/gt.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/8/reconstruct.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/8/prompt.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/8/uslm.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/8/soundstorm.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/8/xtts.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/8/proposed_no_context.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/8/proposed_text.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/8/proposed_audio.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/8/proposed.wav" controls="" preload=""></audio></td>
+  </tbody>
+</table>
+<br>
+<br>
+
+
+<h3>Sample 4</h3>
+<p>Text: however, verne gives his hero's brilliance and benevolence a dark underside the man's obsessive hate for his old enemy.</b></p>
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center"><strong>Groundtruth</strong></th>
+      <th style="text-align: center"><strong>Reconstruct</strong></th>
+      <th style="text-align: center"><strong>Prompt</strong></th>
+      <th style="text-align: center"><strong>VALL-E</strong></th>
+      <th style="text-align: center"><strong>SoundStorm</strong></th>
+      <th style="text-align: center"><strong>XTTS</strong></th>
+      <th style="text-align: center"><strong>Proposed-w/o-context</strong></th>
+      <th style="text-align: center"><strong>Proposed-w/-text</strong></th>
+      <th style="text-align: center"><strong>Proposed-w/-audio</strong></th>
+      <th style="text-align: center"><strong>Proposed</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left"><audio src="samples/libritts/11/gt.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/11/reconstruct.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/11/prompt.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/11/uslm.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/11/soundstorm.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/11/xtts.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/11/proposed_no_context.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/11/proposed_text.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/11/proposed_audio.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/11/proposed.wav" controls="" preload=""></audio></td>
+  </tbody>
+</table>
+<br>
+<br>
+
+
+<h3>Sample 5</h3>
+<p>Text: therefore her majesty paid no attention to anyone and no one paid any attention to her.</b></p>
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center"><strong>Groundtruth</strong></th>
+      <th style="text-align: center"><strong>Reconstruct</strong></th>
+      <th style="text-align: center"><strong>Prompt</strong></th>
+      <th style="text-align: center"><strong>VALL-E</strong></th>
+      <th style="text-align: center"><strong>SoundStorm</strong></th>
+      <th style="text-align: center"><strong>XTTS</strong></th>
+      <th style="text-align: center"><strong>Proposed-w/o-context</strong></th>
+      <th style="text-align: center"><strong>Proposed-w/-text</strong></th>
+      <th style="text-align: center"><strong>Proposed-w/-audio</strong></th>
+      <th style="text-align: center"><strong>Proposed</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left"><audio src="samples/libritts/7/gt.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/7/reconstruct.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/7/prompt.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/7/uslm.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/7/soundstorm.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/7/xtts.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/7/proposed_no_context.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/7/proposed_text.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/7/proposed_audio.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/libritts/7/proposed.wav" controls="" preload=""></audio></td>
+  </tbody>
+</table>
+<br>
+<br>
+<a name="3"><h2>IEMOCAP Evaluation</h2></a>
+<p>
+<b>Groundtruth</b>: the groundtruth speech. <br>
+<b>Reconstruct</b>: the reconstruct speech by SpeechTokenizer. <br>
+<b>VALL-E</b>: use the open-source implementation of VALL-E but use SpeechTokenizer as audio codec instead of Encodec.  <br>
+<b>SoundStorm</b>: only use AR stage of above VALL-E model and replace the NAR stage with same SoundStorm model as ours.  <br>
+<b>XTTS</b>: an open-source zero-shot TTS similar to TortoiseTTS, based on a discrete VAE model as audio codec and also use AR model, but it use fixed length vectors for speaker conditioning via Perceiver model. <br>
+<b>Proposed-w/o-context</b>: our proposed method without MMCE-Qformer. <br>
+<b>Proposed-w/-text</b>: our proposed method using only text context. <br>
+<b>Proposed-w/-audio</b>: our proposed method using audio context. <br>
+<b>Proposed</b>: our proposed method using MMCE-Qformer with multi-modal context. <br>
+</p>
+
+<h3>Sample 1</h3>
+<p>Text: On the contrary, a child of two could get violently drunk on only one glass of brandy.</b></p>
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center"><strong>Groundtruth</strong></th>
+      <th style="text-align: center"><strong>Reconstruct</strong></th>
+      <th style="text-align: center"><strong>Prompt</strong></th>
+      <th style="text-align: center"><strong>VALL-E</strong></th>
+      <th style="text-align: center"><strong>SoundStorm</strong></th>
+      <th style="text-align: center"><strong>XTTS</strong></th>
+      <th style="text-align: center"><strong>Proposed-w/o-context</strong></th>
+      <th style="text-align: center"><strong>Proposed-w/-text</strong></th>
+      <th style="text-align: center"><strong>Proposed-w/-audio</strong></th>
+      <th style="text-align: center"><strong>Proposed</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left"><audio src="samples/iemocap/10/gt.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/10/reconstruct.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/10/prompt.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/10/uslm.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/10/soundstorm.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/10/xtts.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/10/proposed_no_context.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/10/proposed_text.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/10/proposed_audio.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/10/proposed.wav" controls="" preload=""></audio></td>
+  </tbody>
+</table>
+<br>
+<br>
+
+
+<h3>Sample 2</h3>
+<p>Text: Are you crazy?</b></p>
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center"><strong>Groundtruth</strong></th>
+      <th style="text-align: center"><strong>Reconstruct</strong></th>
+      <th style="text-align: center"><strong>Prompt</strong></th>
+      <th style="text-align: center"><strong>VALL-E</strong></th>
+      <th style="text-align: center"><strong>SoundStorm</strong></th>
+      <th style="text-align: center"><strong>XTTS</strong></th>
+      <th style="text-align: center"><strong>Proposed-w/o-context</strong></th>
+      <th style="text-align: center"><strong>Proposed-w/-text</strong></th>
+      <th style="text-align: center"><strong>Proposed-w/-audio</strong></th>
+      <th style="text-align: center"><strong>Proposed</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left"><audio src="samples/iemocap/7/gt.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/7/reconstruct.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/7/prompt.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/7/uslm.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/7/soundstorm.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/7/xtts.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/7/proposed_no_context.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/7/proposed_text.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/7/proposed_audio.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/7/proposed.wav" controls="" preload=""></audio></td>
+  </tbody>
+</table>
+<br>
+<br>
+
+
+<h3>Sample 3</h3>
+<p>Text: I'd rather not remember some things.  I'd rather not hope for some things.</b></p>
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center"><strong>Groundtruth</strong></th>
+      <th style="text-align: center"><strong>Reconstruct</strong></th>
+      <th style="text-align: center"><strong>Prompt</strong></th>
+      <th style="text-align: center"><strong>VALL-E</strong></th>
+      <th style="text-align: center"><strong>SoundStorm</strong></th>
+      <th style="text-align: center"><strong>XTTS</strong></th>
+      <th style="text-align: center"><strong>Proposed-w/o-context</strong></th>
+      <th style="text-align: center"><strong>Proposed-w/-text</strong></th>
+      <th style="text-align: center"><strong>Proposed-w/-audio</strong></th>
+      <th style="text-align: center"><strong>Proposed</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left"><audio src="samples/iemocap/18/gt.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/18/reconstruct.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/18/prompt.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/18/uslm.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/18/soundstorm.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/18/xtts.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/18/proposed_no_context.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/18/proposed_text.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/18/proposed_audio.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/18/proposed.wav" controls="" preload=""></audio></td>
+  </tbody>
+</table>
+<br>
+<br>
+
+
+<h3>Sample 4</h3>
+<p>Text: 'cause you know what you get Carla, you know what you get? This.</b></p>
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center"><strong>Groundtruth</strong></th>
+      <th style="text-align: center"><strong>Reconstruct</strong></th>
+      <th style="text-align: center"><strong>Prompt</strong></th>
+      <th style="text-align: center"><strong>VALL-E</strong></th>
+      <th style="text-align: center"><strong>SoundStorm</strong></th>
+      <th style="text-align: center"><strong>XTTS</strong></th>
+      <th style="text-align: center"><strong>Proposed-w/o-context</strong></th>
+      <th style="text-align: center"><strong>Proposed-w/-text</strong></th>
+      <th style="text-align: center"><strong>Proposed-w/-audio</strong></th>
+      <th style="text-align: center"><strong>Proposed</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left"><audio src="samples/iemocap/19/gt.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/19/reconstruct.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/19/prompt.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/19/uslm.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/19/soundstorm.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/19/xtts.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/19/proposed_no_context.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/19/proposed_text.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/19/proposed_audio.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/19/proposed.wav" controls="" preload=""></audio></td>
+  </tbody>
+</table>
+<br>
+<br>
+
+
+<h3>Sample 5</h3>
+<p>Text: You don't understand anything I'm saying.</b></p>
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center"><strong>Groundtruth</strong></th>
+      <th style="text-align: center"><strong>Reconstruct</strong></th>
+      <th style="text-align: center"><strong>Prompt</strong></th>
+      <th style="text-align: center"><strong>VALL-E</strong></th>
+      <th style="text-align: center"><strong>SoundStorm</strong></th>
+      <th style="text-align: center"><strong>XTTS</strong></th>
+      <th style="text-align: center"><strong>Proposed-w/o-context</strong></th>
+      <th style="text-align: center"><strong>Proposed-w/-text</strong></th>
+      <th style="text-align: center"><strong>Proposed-w/-audio</strong></th>
+      <th style="text-align: center"><strong>Proposed</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left"><audio src="samples/iemocap/17/gt.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/17/reconstruct.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/17/prompt.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/17/uslm.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/17/soundstorm.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/17/xtts.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/17/proposed_no_context.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/17/proposed_text.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/17/proposed_audio.wav" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="samples/iemocap/17/proposed.wav" controls="" preload=""></audio></td>
+  </tbody>
+</table>
+<br>
+<br>
+
+      <footer class="site-footer">
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com/">GitHub Pages</a>.</span>
+      </footer>
+    </section>
+
+</body><grammarly-desktop-integration data-grammarly-shadow-root="true"></grammarly-desktop-integration></html>
